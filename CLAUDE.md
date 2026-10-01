@@ -23,6 +23,10 @@ Leia o documento relevante em `docs/` antes de mexer numa área:
 | `docs/08-api.md` | Contrato da API (rotas, payloads) — referência comum entre `app/` e `web/` |
 | `docs/09-guia-rh.md` | Guia de uso do painel para RH e gestores (não técnico) |
 | `docs/10-roteiro-tutorial.md` | Roteiro para um Claude Code abrir o painel em produção e escrever o tutorial completo |
+| `docs/11-tutorial.md` | Tutorial ilustrado (imagens em `docs/tutorial/img/`) |
+
+Os docs também são exibidos no painel (**Administração › Documentação**, lista em `web/src/lib/documentos.ts`):
+ao mudar comportamento, atualize o `.md` — inclusive o tutorial — no mesmo passo.
 
 ## Stack
 

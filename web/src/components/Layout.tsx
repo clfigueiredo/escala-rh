@@ -13,6 +13,7 @@ import {
   IconeChave,
   IconeCiclo,
   IconeGerar,
+  IconeLivro,
   IconeMenu,
   IconeMensagens,
   IconePessoas,
@@ -58,7 +59,16 @@ const GRUPOS: { titulo: string; itens: ItemMenu[] }[] = [
       { para: '/configuracoes', rotulo: 'Configurações do bot', icone: IconeAjustes, soAdmin: true },
     ],
   },
+  {
+    titulo: 'Administração',
+    itens: [{ para: '/documentacao', rotulo: 'Documentação', icone: IconeLivro, soAdmin: true }],
+  },
 ];
+
+/** Primeira letra ou número do nome (ignora prefixos como "[TESTE]"). */
+function inicialDoNome(nome: string | undefined): string {
+  return (nome?.match(/[\p{L}\p{N}]/u)?.[0] ?? '?').toUpperCase();
+}
 
 export default function Layout() {
   const { usuario, ehAdmin, sair } = useAuth();
@@ -150,7 +160,7 @@ export default function Layout() {
           )}
           <div className="usuario-menu">
             <button type="button" className="usuario-botao" onClick={() => setMenuUsuario((v) => !v)}>
-              <span className="avatar">{usuario?.nome.charAt(0).toUpperCase()}</span>
+              <span className="avatar">{inicialDoNome(usuario?.nome)}</span>
               <span className="usuario-nome">
                 {usuario?.nome}
                 <small>{usuario?.perfil === 'ADMIN' ? 'Administrador' : 'Gestor'}</small>

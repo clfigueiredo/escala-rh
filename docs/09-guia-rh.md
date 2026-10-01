@@ -13,6 +13,7 @@ O menu fica à esquerda (no celular e no tablet, no botão ☰ do canto superior
 | **Escala** | Calendário · Gerar escala · Ausências | todos |
 | **Cadastros** | Funcionários · Setores · Turnos · Padrões de escala · Usuários | todos (Usuários só admin; Setores, Turnos e Padrões o gestor só consulta) |
 | **WhatsApp** | Mensagens · Conexão · Regras de lembrete · Configurações do bot | Mensagens: todos; o resto só admin |
+| **Administração** | Documentação (tutorial ilustrado, este guia e a documentação técnica) | só admin |
 
 No topo aparece o status do WhatsApp (**Conectado**, **Desconectado**...) e o seu nome, com as opções **Trocar senha** e **Sair**. No celular o status vira só uma bolinha (verde = conectado) e o nome fica no botão redondo com a sua inicial. Se o WhatsApp cair, uma faixa preta aparece no alto de todas as telas.
 

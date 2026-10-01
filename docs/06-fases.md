@@ -71,5 +71,9 @@ Marque `[x]` ao concluir. Cada fase termina com uma validação combinada com o 
 - [ ] Criptografar os backups antes de qualquer cópia para fora do servidor
 - [ ] Trocar a senha do admin inicial pelo painel
 
+**Pós-entrega (01/10/2026):**
+- [x] Divergências do tutorial: bot opção 3 (30 dias), resumo da prévia, inativo libera telefone, excluir funcionário, aviso de folga fixa no 6x1
+- [x] Tutorial ilustrado em `docs/11-tutorial.md` e menu **Administração › Documentação** no painel
+
 ## Fase 6 — Evoluções (sob demanda)
 Ver lista "Fase 2 (fora do escopo agora)" em `01-visao-geral.md`: confirmação de presença, escala semanal automática, troca de turnos, exportação PDF/Excel, alertas CLT, auditoria.

@@ -58,7 +58,9 @@ export const ROTULO_ESTADO_WPP: Record<EstadoWhatsApp, string> = {
 /** Formata telefone normalizado (5551999998888) para exibição: +55 (51) 99999-8888 */
 export function fmtTelefone(tel: string | null | undefined): string {
   if (!tel) return '—';
-  const d = tel.replace(/\D/g, '');
+  let d = tel.replace(/\D/g, '');
+  // Celular sem o 9º dígito (ex.: número da conexão vindo do WhatsApp): exibe com o 9.
+  if (d.startsWith('55') && d.length === 12 && /[6-9]/.test(d[4])) d = `${d.slice(0, 4)}9${d.slice(4)}`;
   if (d.startsWith('55') && (d.length === 12 || d.length === 13)) {
     const ddd = d.slice(2, 4);
     const num = d.slice(4);

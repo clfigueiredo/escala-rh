@@ -5,6 +5,8 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 5173,
+    // a página Documentação importa ../docs e ../README.md
+    fs: { allow: ['..'] },
     proxy: {
       '/api': { target: 'http://localhost:3000', changeOrigin: true },
     },

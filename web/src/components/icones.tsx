@@ -26,6 +26,12 @@ export const IconeCalendario = (p: P) => (
     <path d="M3.5 10h17M8 3v4M16 3v4" />
   </Svg>
 );
+export const IconeLivro = (p: P) => (
+  <Svg {...p}>
+    <path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H11v16H5.5A1.5 1.5 0 0 1 4 18.5zM20 5.5A1.5 1.5 0 0 0 18.5 4H13v16h5.5a1.5 1.5 0 0 0 1.5-1.5z" />
+    <path d="M7 8h1.5M7 11h1.5M15.5 8H17M15.5 11H17" />
+  </Svg>
+);
 export const IconeGerar = (p: P) => (
   <Svg {...p}>
     <path d="M4 12a8 8 0 0 1 13.7-5.6L20 8.5M20 4v4.5h-4.5M20 12a8 8 0 0 1-13.7 5.6L4 15.5M4 20v-4.5h4.5" />

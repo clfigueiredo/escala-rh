@@ -106,6 +106,7 @@ Menu lateral (no celular, botão ☰). Caminhos relativos à URL do painel:
 | WhatsApp | Conexão | `/whatsapp` | só admin | QR Code, status. **Só mostrar — não desconectar** |
 | WhatsApp | Regras de lembrete | `/regras-lembrete` | só admin | Antecedência × Véspera, variáveis, pré-visualização |
 | WhatsApp | Configurações do bot | `/configuracoes` | só admin | Menu do bot, mensagem "sem turno", número desconhecido (ignorar/responder) |
+| Administração | Documentação | `/documentacao` | só admin | Tutorial, guia do RH e docs técnicos renderizados de `docs/`; imprimir/salvar PDF |
 
 Tire também capturas em **largura de celular** (ex.: 390 px) do calendário e de uma lista — o painel funciona no celular,
 listas viram cartões e o calendário abre em Lista; no celular não dá para arrastar plantões.

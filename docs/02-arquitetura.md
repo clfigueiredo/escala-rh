@@ -97,9 +97,10 @@ web/                          # painel (React + Vite + FullCalendar); build em w
     ├── api/                  # client.ts (fetch com cookie), index.ts (funções por recurso), types.ts
     ├── contexts/             # AuthContext (sessão), ToastContext (avisos)
     ├── components/           # Layout (menu, alerta de WhatsApp, trocar senha), PlantaoModal, ui.tsx
-    ├── lib/                  # datas (fuso SP), hooks, rotulos
+    ├── lib/                  # datas (fuso SP), hooks, rotulos, documentos (renderiza os .md de docs/)
     ├── pages/                # Login, Calendario, Gerador, Ausencias, Funcionarios, Setores, Turnos,
-    │                         # Padroes, Usuarios, WhatsApp (Conexão), RegrasLembrete, Configuracoes, Mensagens
+    │                         # Padroes, Usuarios, WhatsApp (Conexão), RegrasLembrete, Configuracoes, Mensagens,
+    │                         # Documentacao (carregada sob demanda; mostra docs/*.md e o README)
     └── styles.css
 ```
 

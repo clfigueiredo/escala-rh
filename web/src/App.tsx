@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { lazy, Suspense, type ReactNode } from 'react';
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import Layout from './components/Layout';
 import { Carregando } from './components/ui';
@@ -16,6 +16,9 @@ import SetoresPage from './pages/SetoresPage';
 import TurnosPage from './pages/TurnosPage';
 import UsuariosPage from './pages/UsuariosPage';
 import WhatsAppPage from './pages/WhatsAppPage';
+
+// Carregada sob demanda: traz o renderizador de Markdown e os textos de docs/.
+const DocumentacaoPage = lazy(() => import('./pages/DocumentacaoPage'));
 
 function Protegido({ children }: { children: ReactNode }) {
   const { usuario, carregando } = useAuth();
@@ -54,6 +57,7 @@ export default function App() {
         <Route path="whatsapp" element={<SoAdmin><WhatsAppPage /></SoAdmin>} />
         <Route path="regras-lembrete" element={<SoAdmin><RegrasLembretePage /></SoAdmin>} />
         <Route path="configuracoes" element={<SoAdmin><ConfiguracoesPage /></SoAdmin>} />
+        <Route path="documentacao/:slug?" element={<SoAdmin><Suspense fallback={<Carregando />}><DocumentacaoPage /></Suspense></SoAdmin>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>

@@ -32,12 +32,12 @@ turno. O funcionário também pode consultar a própria escala conversando com o
 
 | Perfil | Onde acessa | O que pode fazer |
 |---|---|---|
-| **Administrador** | Painel | Tudo: usuários, setores, turnos, padrões, funcionários, escalas, ausências, mensagens, conexão do WhatsApp, regras de lembrete e configurações do bot. |
+| **Administrador** | Painel | Tudo: usuários, setores, turnos, padrões, funcionários, escalas, ausências, mensagens, conexão do WhatsApp, regras de lembrete, configurações do bot e a documentação do sistema. |
 | **Gestor** | Painel | Funcionários, plantões, ausências e mensagens **somente dos setores vinculados a ele**. Vê (sem alterar) setores, turnos e padrões. |
 | **Funcionário** | Só WhatsApp | Recebe os lembretes e consulta a escala pelo bot. **Não tem login.** |
 
-**Menu do administrador × menu do gestor.** O gestor não vê *Usuários*, *Conexão*, *Regras de lembrete* nem
-*Configurações do bot*, e o calendário dele mostra só os plantões dos setores dele.
+**Menu do administrador × menu do gestor.** O gestor não vê *Usuários*, *Conexão*, *Regras de lembrete*,
+*Configurações do bot* nem *Documentação*, e o calendário dele mostra só os plantões dos setores dele.
 
 | Administrador | Gestor (só "[TESTE] Enfermagem") |
 |---|---|
@@ -116,12 +116,14 @@ Exemplo de outubro/2026 (01/10 é uma quinta-feira):
 
 ### Como navegar
 
-- O **menu lateral** tem três grupos:
+- O **menu lateral** tem estes grupos:
   - **Escala**: Calendário, Gerar escala, Ausências.
   - **Cadastros**: Funcionários, Setores, Turnos, Padrões de escala, Usuários.
   - **WhatsApp**: Mensagens, Conexão, Regras de lembrete, Configurações do bot.
+  - **Administração** (só administrador): **Documentação** — este tutorial, o guia rápido do RH e toda a
+    documentação técnica do sistema, dentro do próprio painel.
 - No topo fica o **status do WhatsApp** ("WhatsApp: Conectado", com bolinha verde). Se o WhatsApp cair, aparece uma
-  **faixa vermelha** no topo do painel avisando que os lembretes não serão enviados.
+  **faixa preta** no topo do painel avisando que os lembretes não serão enviados.
 
 ---
 
@@ -129,8 +131,9 @@ Exemplo de outubro/2026 (01/10 é uma quinta-feira):
 
 **Ordem recomendada:** Setores → Turnos → Padrões de escala → Usuários (gestores) → Funcionários → Gerar escala → conferir no Calendário.
 
-> **Nada é apagado nos cadastros** (setor, turno, padrão, usuário, funcionário). Para "remover", edite o item e
-> desmarque **ativo**. Itens inativos somem das listas de escolha, mas o histórico continua.
+> **Setor, turno, padrão e usuário não são apagados**: para "remover", edite o item e desmarque **ativo**. Itens
+> inativos somem das listas de escolha, mas o histórico continua. **Funcionário** também pode ser desativado e, se
+> for preciso, **excluído** de vez (seção 4.5).
 
 Cenário usado como exemplo: uma **clínica** com atendimento 24 h na enfermagem e na portaria, mais um setor
 administrativo em horário comercial.
@@ -229,16 +232,22 @@ Os padrões **12x36**, **6x1** e **5x2** já vêm cadastrados:
 | Mensagem | O que significa |
 |---|---|
 | "Celular precisa ter 9 dígitos (com o 9 na frente)." | Faltou o 9 no começo do celular. |
-| "Telefone já cadastrado para …" | Esse número já pertence a outro funcionário, **mesmo que ele esteja inativo**. |
+| "Telefone já cadastrado para …" | Esse número já pertence a outro funcionário **ativo**. Funcionário inativo não bloqueia o número. |
 
 ![Erro: celular sem o 9](tutorial/img/21-funcionario-erro-9-digitos.png)
 
 ![Erro: telefone já cadastrado](tutorial/img/22-funcionario-erro-duplicado.png)
 
-**Ativo × inativo:** o funcionário **inativo não recebe lembretes nem respostas do bot**. Para desligar alguém, abra
-**Editar** e desmarque **Ativo**.
+**Ativo × inativo:** o funcionário **inativo não recebe lembretes nem respostas do bot** e **libera o número**: o
+mesmo celular pode ser cadastrado para outra pessoa. Para desligar alguém, abra **Editar** e desmarque **Ativo**
+(o histórico de plantões fica guardado). Ao reativar, o sistema confere se o número não passou a ser de outro
+funcionário ativo.
 
 ![Editar funcionário – campo Ativo](tutorial/img/23-funcionario-editar-ativo.png)
+
+**Excluir de vez:** na lista, clique em **Excluir** na linha do funcionário e confirme. A exclusão **apaga junto
+todos os plantões (passados e futuros) e as ausências** da pessoa; o histórico de mensagens continua, sem o nome.
+**Não dá para desfazer.** Use para cadastros feitos por engano; para desligamentos, prefira desmarcar **Ativo**.
 
 Use a **busca** (nome ou telefone) e os filtros de **setor** e **situação** (Somente ativos / Somente inativos / Todos):
 
@@ -273,7 +282,8 @@ de pessoas que segue o **mesmo padrão + turno + início de ciclo**.
 
    ![Formulário do gerador](tutorial/img/30-gerador-formulario.png)
 
-3. Clique em **Pré-visualizar**. **Nada é gravado ainda.** Aparecem o total de plantões, quantos têm conflito e a lista dia a dia.
+3. Clique em **Pré-visualizar**. **Nada é gravado ainda.** Aparecem o total de plantões, quantos têm conflito, o
+   **resumo por funcionário** (plantões, horas e conflitos de cada pessoa) e a lista dia a dia.
 
    ![Pré-visualização](tutorial/img/31-gerador-previa.png)
 
@@ -303,9 +313,16 @@ Bruno se alternam e todos os dias ficam cobertos:
   | ![Início do plantão noturno](tutorial/img/39-noite-inicio-19h.png) | ![Fim do plantão noturno](tutorial/img/39b-noite-termina-dia-seguinte.png) |
 
 - **6x1** (Diego, Plantão dia, início dia 1): 27 plantões em outubro. Como o ciclo tem 7 dias (6 + 1), a folga cai
-  sempre no **mesmo dia da semana** (no exemplo, todas as quartas).
+  sempre no **mesmo dia da semana** (no exemplo, todas as quartas). O gerador avisa isso logo abaixo da data de
+  início do ciclo. Para espalhar as folgas da equipe, gere grupos com datas de início diferentes: quem começa um
+  dia depois folga um dia depois.
 
-  ![Prévia 6x1](tutorial/img/37-gerador-previa-6x1.png)
+  No exemplo abaixo (outro funcionário de teste, novembro, início do ciclo em 01/11, um domingo), o aviso diz
+  "Folga fixa toda semana: sábado", e a prévia traz o **resumo por funcionário**:
+
+  ![Aviso de folga fixa no 6x1](tutorial/img/37a-gerador-aviso-folga-fixa.png)
+
+  ![Prévia 6x1 com resumo por funcionário](tutorial/img/37-gerador-previa-6x1.png)
 
   ![Calendário com 12x36 noite e 6x1](tutorial/img/38-calendario-noite-e-6x1.png)
 
@@ -460,7 +477,7 @@ atualizado sozinho a cada 3 segundos.
 4. O QR Code expira rápido. Se expirar, gere outro.
 
 > ⚠ **Desconectar** só deve ser usado para **trocar de número**. Enquanto estiver desconectado, nenhum lembrete sai e o
-> bot não responde. Se o WhatsApp cair, aparece uma **faixa vermelha** no topo do painel com o botão **Conectar agora**.
+> bot não responde. Se o WhatsApp cair, aparece uma **faixa preta** no topo do painel com o botão **Conectar agora**.
 
 **Boas práticas contra bloqueio do número:**
 
@@ -525,15 +542,15 @@ O funcionário manda qualquer mensagem para o número da empresa e recebe o **me
 | qualquer texto (ex.: "oi") | o menu |
 | `1` | próximo turno (data, dia da semana, horário e setor) |
 | `2` | escala dos próximos 7 dias |
-| `3` | escala do **mês atual** |
+| `3` | escala dos **próximos 30 dias** (no fim do mês já mostra o mês seguinte) |
 | outra coisa | o menu de novo |
 
-| Menu e opção 1 | Opção 2 | Opção 3 |
-|---|---|---|
-| ![Bot: menu e opção 1](tutorial/img/85-bot-menu-opcao1.png) | ![Bot: opção 2](tutorial/img/86-bot-opcao2.png) | ![Bot: opção 3](tutorial/img/87-bot-opcao3.png) |
+| Menu e opção 1 | Opção 2 |
+|---|---|
+| ![Bot: menu e opção 1](tutorial/img/85-bot-menu-opcao1.png) | ![Bot: opção 2](tutorial/img/86-bot-opcao2.png) |
 
-> A opção **3** considera o **mês corrente do calendário**. No teste, feito em 30/09, ela respondeu "Você não tem
-> turnos agendados neste período", porque os plantões da Ana começavam em outubro. Nesse caso, a opção **2** mostra os próximos dias.
+> A opção **3** usa uma **janela de 30 dias a partir de hoje**, e não o mês do calendário. Assim, no último dia do
+> mês o funcionário já vê a escala do mês seguinte.
 
 - O bot só responde a **funcionários ativos** cadastrados.
 - Plantões dentro de uma ausência não são listados.
@@ -544,6 +561,7 @@ O funcionário manda qualquer mensagem para o número da empresa e recebe o **me
 Abra **WhatsApp › Configurações do bot**. Nessa tela você ajusta:
 
 - **Menu do bot**: o texto enviado quando a pessoa manda algo que não é uma opção. As opções 1, 2 e 3 são **fixas**.
+  Se o seu menu ainda diz "3 — Minha escala do mês", troque por "3 — Minha escala dos próximos 30 dias".
 - **Mensagem quando não há turno no período**: usada nas opções 1, 2 e 3.
 - **Número desconhecido** (quem não é funcionário ativo):
   - **Ignorar**: não responde nada.
@@ -620,28 +638,28 @@ Sim, para o horário novo (se ainda der tempo).
 No calendário, abra o plantão e troque o **Funcionário**. O lembrete vai para a nova pessoa.
 
 **Um funcionário saiu da empresa.**
-Edite o cadastro e desmarque **Ativo**. Depois exclua ou reatribua os plantões futuros dele no calendário.
+Edite o cadastro e desmarque **Ativo**. Depois exclua ou reatribua os plantões futuros dele no calendário. Use
+**Excluir** só se quiser apagar a pessoa e todo o histórico de plantões dela.
 
-**Quero cadastrar um número que aparece como "já cadastrado", mas o dono antigo está inativo.**
-O sistema não exclui funcionários, e o número continua preso ao cadastro antigo. Se for a mesma pessoa, **reative e
-edite** o cadastro antigo em vez de criar outro.
+**O número aparece como "já cadastrado".**
+Ele pertence a outro funcionário **ativo**. Se o número mudou de dono, desative (ou exclua) o cadastro antigo e
+salve de novo. Se for a mesma pessoa voltando, **reative e edite** o cadastro antigo em vez de criar outro — assim o
+histórico fica junto.
 
 **O gestor não vê um funcionário ou setor.**
 Um administrador precisa marcar o setor em **Usuários › Editar › Setores que este gestor pode ver**.
 
 **Posso apagar um setor, turno ou padrão?**
-Não, apenas desativar. Os plantões antigos continuam com o nome e a cor.
+Não, apenas desativar (só funcionários podem ser excluídos). Os plantões antigos continuam com o nome e a cor.
 
 **Gerei a escala com o ciclo errado.**
 Exclua os plantões errados no calendário (ou gere de novo o período com **Substituir**, conferindo a prévia) e ajuste
 a **Data de início do ciclo**.
 
 **No 6x1 a folga não "anda" pela semana. É erro?**
-Não. O ciclo 6x1 tem 7 dias, então a folga cai sempre no mesmo dia da semana. Para variar a folga, gere períodos
-menores com outro início de ciclo ou ajuste os plantões no calendário.
-
-**A opção 3 do bot disse que não tenho turnos, mas tenho no mês que vem.**
-A opção 3 mostra só o **mês atual**. Use a opção 2 (próximos 7 dias) ou a 1 (próximo turno).
+Não. O ciclo 6x1 tem 7 dias, então a folga cai sempre no mesmo dia da semana — o gerador mostra qual é. Para
+variar a folga entre as pessoas, gere grupos com datas de início diferentes; para trocar a folga de alguém num mês,
+gere com outro início de ciclo ou ajuste os plantões no calendário.
 
 **O painel mostra "WhatsApp desconectado".**
 Só o administrador reconecta, na tela **Conexão**. Enquanto isso, nenhum lembrete é enviado e o bot não responde.
@@ -651,15 +669,15 @@ Os lembretes que deveriam ter saído nesse tempo ficam como **Falhou** e não s�
 
 ## Anexo: divergências e sugestões de melhoria
 
-Pontos observados ao percorrer o sistema real em 30/09/2026:
+Pontos observados ao percorrer o sistema real em 30/09/2026 e o que foi feito com cada um:
 
-| # | Onde | Observado | Sugestão |
+| # | Onde | Observado | Situação |
 |---|---|---|---|
-| 1 | Gerar escala › prévia | O roteiro cita um "resumo por funcionário (plantões e horas)". A prévia mostra só os totais (plantões / com conflito / sem conflito) e a lista dia a dia. | Incluir o resumo por funcionário com total de horas. |
-| 2 | Padrão 6x1 | Por ser um ciclo de 7 dias, a folga cai sempre no mesmo dia da semana. O roteiro diz que ela "anda". | Ajustar o texto da documentação ou oferecer um modo de folga rotativa. |
-| 3 | Bot, opção 3 | "Escala do mês" usa o mês corrente. No último dia do mês, responde "sem turnos" mesmo com o mês seguinte já gerado. | Mostrar os próximos 30 dias, ou o mês seguinte quando o atual estiver no fim. |
-| 4 | Funcionários | Não há exclusão, e o funcionário **inativo continua bloqueando o telefone** ("Telefone já cadastrado"). | Permitir liberar o número de cadastros inativos, ou deixar isso claro na mensagem de erro. |
-| 5 | Gerar / Excluir plantão | As confirmações usam a caixa nativa do navegador ("Gerar N plantão(ões)?", "Excluir o plantão de…?"). | Trocar por um modal do próprio painel (visual consistente e mais fácil de automatizar e testar). |
-| 6 | Topo (gestor) | O avatar mostra a primeira letra do nome. Com o prefixo "[TESTE]", aparece "[". | Usar a primeira letra alfanumérica do nome. |
-| 7 | Conexão | O número da empresa aparece com 8 dígitos após o DDD (sem o 9). | Exibir no mesmo formato usado nos funcionários. |
-| 8 | Telas pequenas | Num notebook com tela de 1280×720 (escala 150%), o calendário mostra poucas linhas e os modais exigem rolagem. | Rever a altura do cabeçalho e dos filtros do calendário. |
+| 1 | Gerar escala › prévia | O "resumo por funcionário" só aparecia com 2 ou mais pessoas selecionadas. | **Corrigido** em 01/10/2026: aparece sempre. |
+| 2 | Padrão 6x1 | Por ser um ciclo de 7 dias, a folga cai sempre no mesmo dia da semana; o roteiro dizia que ela "anda". | **Documentação corrigida** e o gerador agora avisa "Folga fixa toda semana: …". Folga rotativa seria um novo tipo de padrão (não implementado). |
+| 3 | Bot, opção 3 | Usava o mês corrente; no último dia do mês respondia "sem turnos". | **Corrigido**: mostra os próximos 30 dias. |
+| 4 | Funcionários | Não havia exclusão, e o inativo bloqueava o telefone. | **Corrigido**: inativo libera o número e há o botão **Excluir**. |
+| 5 | Gerar / Excluir plantão | As confirmações usam a caixa nativa do navegador ("Gerar N plantão(ões)?", "Excluir o plantão de…?"). | Pendente (sugestão: modal do próprio painel). |
+| 6 | Topo (gestor) | O avatar mostrava a primeira letra do nome; com o prefixo "[TESTE]", aparecia "[". | **Corrigido**: usa a primeira letra ou número do nome. |
+| 7 | Conexão | O número da empresa aparecia com 8 dígitos após o DDD (sem o 9). | **Corrigido**: exibido com o 9, no mesmo formato dos funcionários. |
+| 8 | Telas pequenas | Num notebook com tela de 1280×720 (escala 150%), o calendário mostra poucas linhas e os modais exigem rolagem. | Pendente. |

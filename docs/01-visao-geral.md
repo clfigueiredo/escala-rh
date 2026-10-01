@@ -44,6 +44,10 @@ Guia de uso para o RH/gestores: [09-guia-rh.md](09-guia-rh.md).
 - **Conexão do WhatsApp** pelo painel (QR Code + status da conexão).
 - **Histórico de mensagens** enviadas e recebidas, com status e erro.
 
+### Documentação
+- Menu **Administração › Documentação** (só admin): o tutorial ilustrado, o guia do RH e toda a documentação técnica
+  (os arquivos de `docs/` e o README), com sumário de cada documento e opção de imprimir/salvar em PDF.
+
 ### Configurações gerais
 - Regras de lembrete e textos.
 - Mensagem de boas-vindas/menu do bot.
