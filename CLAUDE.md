@@ -4,7 +4,7 @@ Sistema web para o RH montar a escala de trabalho dos funcionários e avisar cad
 
 - **URL:** https://hotspotcontabo.forumtelecom.com.br
 - **Servidor:** este mesmo (Ubuntu 24.04, 4 vCPU, 8 GB RAM, IP 62.171.184.27)
-- **Ambiente:** servidor de **homologação (testes)**. Versionado com **git** (branch `main`) e espelhado num repositório **privado no GitHub**. `.env`, `backups/`, `node_modules/`, `dist/` e `everything-claude-code/` ficam fora do git (ver `.gitignore`) — nunca versionar segredos. Antes de alterações arriscadas, faça commit ou backup do banco (`./scripts/backup.sh`).
+- **Ambiente:** servidor de **homologação (testes)**. Versionado com **git** (branch `main`) e espelhado no GitHub privado (https://github.com/clfigueiredo/escala-rh, remote `origin`). `.env`, `backups/`, `node_modules/`, `dist/` e `everything-claude-code/` ficam fora do git (ver `.gitignore`) — nunca versionar segredos. Antes de alterações arriscadas, faça commit ou backup do banco (`./scripts/backup.sh`).
 - **Idioma:** interface, mensagens e documentação em português (pt-BR). Código (nomes de variáveis/funções) pode ser em português quando for termo de domínio (`funcionario`, `escala`, `turno`).
 
 ## Documentação
