@@ -305,6 +305,7 @@ Mais casos em [`docs/07-operacao.md`](docs/07-operacao.md#troubleshooting).
 | [`docs/07-operacao.md`](docs/07-operacao.md) | Deploy, logs, backup/restore, troubleshooting |
 | [`docs/08-api.md`](docs/08-api.md) | Contrato da API |
 | [`docs/09-guia-rh.md`](docs/09-guia-rh.md) | Guia de uso do painel para o RH (não técnico) |
+| [`docs/10-roteiro-tutorial.md`](docs/10-roteiro-tutorial.md) | Roteiro para gerar o tutorial completo com o Claude Code |
 | [`app/README.md`](app/README.md) | Convenções do backend para desenvolvedores |
 
 ## Estrutura de pastas

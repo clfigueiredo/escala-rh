@@ -9,5 +9,6 @@
 7. [Operação: deploy, backup e troubleshooting](07-operacao.md)
 8. [Contrato da API](08-api.md)
 9. [Guia de uso para o RH e gestores](09-guia-rh.md) — passo a passo do painel (não técnico)
+10. [Roteiro para gerar o tutorial](10-roteiro-tutorial.md) — instruções para um Claude Code percorrer o painel e escrever o tutorial completo
 
 Para desenvolvedores: `app/README.md` (convenções do backend, helpers de data/telefone/escopo, testes).
