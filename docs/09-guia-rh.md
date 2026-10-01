@@ -60,8 +60,8 @@ só deve ser usado para trocar de número.
 
 ## 4. Cadastros
 
-Nada é apagado nos cadastros: para "remover", edite e desmarque **ativo**. Itens inativos somem das listas de escolha,
-mas o histórico continua.
+Para "remover" um cadastro, edite e desmarque **ativo**. Itens inativos somem das listas de escolha,
+mas o histórico continua. Só funcionários têm também o botão **Excluir** (definitivo — veja 4.5).
 
 ### 4.1 Setores (administrador)
 **Cadastros › Setores › + Novo setor** → Nome › Salvar. Ex.: Recepção, Enfermagem, Portaria.
@@ -94,7 +94,10 @@ e o +55 é colocado automaticamente. Antes de salvar, confira a linha **"Será s
 Número sem o 9 na frente ou com DDD inexistente não é aceito. Se aparecer
 "Telefone já cadastrado para ...", o número já pertence a outro funcionário.
 
-- Funcionário **inativo** não recebe lembretes nem respostas do bot.
+- Funcionário **inativo** não recebe lembretes nem respostas do bot, e **libera o número**: o mesmo celular pode ser
+  cadastrado para outra pessoa (só não pode haver dois funcionários *ativos* com o mesmo número).
+- **Excluir** apaga o funcionário de vez, junto com todos os plantões e ausências dele. Não dá para desfazer.
+  Para desligamentos, prefira desmarcar **ativo** (mantém o histórico).
 - O gestor só cadastra funcionários nos seus setores.
 - Use a busca por nome ou telefone e os filtros de setor/situação no topo da lista.
 
@@ -189,7 +192,7 @@ O funcionário manda qualquer mensagem para o número do sistema e recebe o menu
 |---|---|
 | **1** | Meu próximo turno (data, dia da semana, horário e setor) |
 | **2** | Minha escala dos próximos 7 dias |
-| **3** | Minha escala do mês atual |
+| **3** | Minha escala dos próximos 30 dias |
 | qualquer outra coisa | o menu de novo |
 
 - As ausências do período aparecem na resposta, e plantões dentro de ausência não são listados.

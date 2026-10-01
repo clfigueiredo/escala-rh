@@ -127,13 +127,13 @@ Bom trabalho!
 |---|---|
 | `1` | Próximo turno (data, dia da semana, horário, setor) |
 | `2` | Turnos de hoje até os próximos 7 dias |
-| `3` | Turnos do mês corrente |
+| `3` | Turnos de hoje até os próximos 30 dias |
 | qualquer outra coisa | Menu (`configuracoes.bot.menu`) |
 
 - Sem turno no período → `configuracoes.bot.sem_turno`.
 - Mostrar ausências no período (ex.: "12/10 a 20/10 — Férias"). Plantões cuja data cai dentro de uma ausência
   não são listados (não serão trabalhados).
-- `2` = de hoje até hoje + 7 dias; `3` = mês corrente inteiro (inclui dias já passados).
+- `2` = de hoje até hoje + 7 dias; `3` = de hoje até hoje + 30 dias (janela móvel: no fim do mês já inclui o mês seguinte).
 - Registra em `mensagens` a RECEBIDA e a ENVIADA (origem `BOT`). O texto recebido é truncado em 1000 caracteres.
 - Número não cadastrado/inativo → `configuracoes.bot.numero_desconhecido` (padrão: `responder` com
   "Este número é da empresa… Não respondemos números não cadastrados."). **Só o 1º contato** do número é gravado

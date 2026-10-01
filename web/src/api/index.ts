@@ -62,6 +62,7 @@ export const funcionariosApi = {
   obter: (id: number) => http.get<Funcionario>(`/funcionarios/${id}`),
   criar: (dados: FuncionarioInput) => http.post<Funcionario>('/funcionarios', dados),
   atualizar: (id: number, dados: FuncionarioInput) => http.put<Funcionario>(`/funcionarios/${id}`, dados),
+  excluir: (id: number) => http.del(`/funcionarios/${id}`),
 };
 
 export const turnosApi = {

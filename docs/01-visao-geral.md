@@ -40,7 +40,7 @@ Guia de uso para o RH/gestores: [09-guia-rh.md](09-guia-rh.md).
 - **Bot de consulta** para o funcionário:
   - `1` — meu próximo turno
   - `2` — minha escala da semana
-  - `3` — minha escala do mês
+  - `3` — minha escala dos próximos 30 dias
 - **Conexão do WhatsApp** pelo painel (QR Code + status da conexão).
 - **Histórico de mensagens** enviadas e recebidas, com status e erro.
 

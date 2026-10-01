@@ -45,7 +45,7 @@
 2. App valida o token, responde 200 na hora e processa em segundo plano; ignora mensagens de grupo, de status, enviadas pelo próprio número, sem texto, repetidas (mesmo id) ou com mais de 10 min.
 3. Normaliza o telefone e procura funcionário ativo (com e sem 9º dígito).
 4. Não achou → segue configuração (ignora ou resposta padrão).
-5. Achou → interpreta: `1` próximo turno, `2` semana, `3` mês, qualquer outra coisa → menu.
+5. Achou → interpreta: `1` próximo turno, `2` semana, `3` próximos 30 dias, qualquer outra coisa → menu.
 6. Responde via Evolution e registra entrada e saída em `mensagens`.
 
 ### Geração de escala

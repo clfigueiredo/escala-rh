@@ -7,7 +7,9 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from 'vites
 
 const db = vi.hoisted(() => ({
   usuario: { findUnique: vi.fn(), findUniqueOrThrow: vi.fn(), update: vi.fn(), findMany: vi.fn() },
-  funcionario: { findMany: vi.fn(), findFirst: vi.fn(), findUnique: vi.fn(), create: vi.fn() },
+  funcionario: { findMany: vi.fn(), findFirst: vi.fn(), findUnique: vi.fn(), create: vi.fn(), update: vi.fn(), delete: vi.fn() },
+  plantao: { deleteMany: vi.fn() },
+  $transaction: vi.fn((ops: unknown[]) => Promise.all(ops)),
   setor: { findUnique: vi.fn(), findMany: vi.fn() },
   turno: { findMany: vi.fn(), create: vi.fn() },
 }));
@@ -153,6 +155,43 @@ describe('funcionários', () => {
     expect(r.statusCode).toBe(409);
     const where = db.funcionario.findFirst.mock.calls[0][0].where;
     expect(where.OR[0].telefone.in).toEqual(['5551999998888', '555199998888']);
+    expect(where.ativo).toBe(true); // inativo não bloqueia o número
+  });
+  it('cadastro inativo não verifica conflito de telefone', async () => {
+    const cookie = await login('admin@x.com');
+    db.setor.findUnique.mockResolvedValue({ id: 10, nome: 'Recepção', ativo: true });
+    db.funcionario.create.mockImplementation(({ data }) =>
+      Promise.resolve({ id: 1, ...data, setor: { id: 10, nome: 'Recepção' } }),
+    );
+    const r = await app.inject({ method: 'POST', url: '/api/funcionarios', headers: { cookie }, payload: { ...payload, ativo: false } });
+    expect(r.statusCode).toBe(201);
+    expect(db.funcionario.findFirst).not.toHaveBeenCalled();
+  });
+  it('reativar sem mudar o telefone → verifica conflito com ativos (409)', async () => {
+    const cookie = await login('admin@x.com');
+    db.funcionario.findUnique.mockResolvedValue({ id: 3, setorId: 10, ativo: false, telefone: '5551999998888', telefoneAlt: '555199998888' });
+    db.funcionario.findFirst.mockResolvedValue({ id: 7, nome: 'Bia', setorId: 10 });
+    const r = await app.inject({ method: 'PUT', url: '/api/funcionarios/3', headers: { cookie }, payload: { ativo: true } });
+    expect(r.statusCode).toBe(409);
+    const where = db.funcionario.findFirst.mock.calls[0][0].where;
+    expect(where).toMatchObject({ ativo: true, NOT: { id: 3 } });
+  });
+  it('exclui funcionário junto com os plantões → 204', async () => {
+    const cookie = await login('admin@x.com');
+    db.funcionario.findUnique.mockResolvedValue({ id: 3, setorId: 10, ativo: false });
+    db.plantao.deleteMany.mockResolvedValue({ count: 2 });
+    db.funcionario.delete.mockResolvedValue({ id: 3 });
+    const r = await app.inject({ method: 'DELETE', url: '/api/funcionarios/3', headers: { cookie } });
+    expect(r.statusCode).toBe(204);
+    expect(db.plantao.deleteMany).toHaveBeenCalledWith({ where: { funcionarioId: 3 } });
+    expect(db.funcionario.delete).toHaveBeenCalledWith({ where: { id: 3 } });
+  });
+  it('gestor não exclui funcionário de outro setor', async () => {
+    const cookie = await login('gestor@x.com');
+    db.funcionario.findUnique.mockResolvedValue({ id: 5, setorId: 99 });
+    const r = await app.inject({ method: 'DELETE', url: '/api/funcionarios/5', headers: { cookie } });
+    expect([403, 404]).toContain(r.statusCode);
+    expect(db.funcionario.delete).not.toHaveBeenCalled();
   });
   it('cria normalizando telefone', async () => {
     const cookie = await login('admin@x.com');

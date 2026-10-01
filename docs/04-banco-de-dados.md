@@ -45,7 +45,7 @@ Vínculo N:N — quais setores o gestor pode ver. `(usuario_id, setor_id)` únic
 | observacoes | text | opcional |
 | ativo | bool | inativo não recebe lembrete nem resposta do bot |
 
-Índices: `telefone` único, `telefone_alt`, `setor_id`. A API também impede que o número (em qualquer variação) já esteja em `telefone` ou `telefone_alt` de outro funcionário.
+Índices: `telefone`, `telefone_alt`, `setor_id` (o `telefone` deixou de ser único na migration `0005`). A unicidade vale **só entre ativos** e é garantida pela API: um funcionário ativo não pode usar um número (em qualquer variação) que esteja em `telefone` ou `telefone_alt` de outro ativo. Inativo não bloqueia o número. Excluir um funcionário apaga junto os plantões e as ausências dele; as mensagens ficam com `funcionario_id` nulo.
 
 ### turnos
 | Campo | Tipo | Observação |

@@ -52,20 +52,30 @@ export function serializarFuncionario(f: FuncionarioComSetor) {
   };
 }
 
-/**
- * Normaliza o telefone e garante que nenhuma variação já está em uso.
- * Se o funcionário que já usa o número estiver fora do escopo do usuário (gestor de
- * outro setor), o 409 não revela nome nem id.
- */
-async function prepararTelefone(usuario: UsuarioSessao, bruto: string, ignorarId?: number) {
+/** Normaliza o telefone digitado e calcula a variação do 9º dígito. */
+function normalizarTelefone(bruto: string) {
   const telefone = normalizarTelefoneCadastro(bruto);
   if (!telefone) {
     throw badRequest('Telefone inválido. Informe DDD + celular com 9 dígitos, ex.: (51) 99999-8888');
   }
-  const telefoneAlt = variacaoNonoDigito(telefone);
-  const variantes = telefoneAlt ? [telefone, telefoneAlt] : [telefone];
+  return { telefone, telefoneAlt: variacaoNonoDigito(telefone) };
+}
+
+/**
+ * Garante que nenhuma variação do número está em uso por outro funcionário ATIVO
+ * (inativo não bloqueia o número — ex.: ex-funcionário cujo celular foi para outra pessoa).
+ * Se o dono do número estiver fora do escopo do usuário (gestor de outro setor), o 409
+ * não revela nome nem id.
+ */
+async function assertTelefoneLivre(
+  usuario: UsuarioSessao,
+  tel: { telefone: string; telefoneAlt: string | null },
+  ignorarId?: number,
+) {
+  const variantes = tel.telefoneAlt ? [tel.telefone, tel.telefoneAlt] : [tel.telefone];
   const outro = await prisma.funcionario.findFirst({
     where: {
+      ativo: true,
       OR: [{ telefone: { in: variantes } }, { telefoneAlt: { in: variantes } }],
       ...(ignorarId ? { NOT: { id: ignorarId } } : {}),
     },
@@ -75,7 +85,6 @@ async function prepararTelefone(usuario: UsuarioSessao, bruto: string, ignorarId
     if (!podeAcessarSetor(usuario, outro.setorId)) throw conflict('Telefone já cadastrado');
     throw conflict(`Telefone já cadastrado para ${outro.nome}`, { funcionarioId: outro.id });
   }
-  return { telefone, telefoneAlt };
 }
 
 async function assertSetorExiste(setorId: number) {
@@ -122,7 +131,8 @@ const funcionarios: FastifyPluginAsync = async (app) => {
     const d = criarSchema.parse(request.body);
     assertSetorPermitido(request.usuario, d.setorId);
     await assertSetorExiste(d.setorId);
-    const tel = await prepararTelefone(request.usuario, d.telefone);
+    const tel = normalizarTelefone(d.telefone);
+    if (d.ativo) await assertTelefoneLivre(request.usuario, tel);
     const f = await prisma.funcionario.create({
       data: {
         nome: d.nome,
@@ -140,12 +150,20 @@ const funcionarios: FastifyPluginAsync = async (app) => {
   app.put('/:id', async (request) => {
     const { id } = idParamSchema.parse(request.params);
     const d = atualizarSchema.parse(request.body);
-    await carregarFuncionarioPermitido(request.usuario, id, 'escrita');
+    const atual = await carregarFuncionarioPermitido(request.usuario, id, 'escrita');
     if (d.setorId !== undefined) {
       assertSetorPermitido(request.usuario, d.setorId);
       await assertSetorExiste(d.setorId);
     }
-    const tel = d.telefone !== undefined ? await prepararTelefone(request.usuario, d.telefone, id) : {};
+    const tel = d.telefone !== undefined ? normalizarTelefone(d.telefone) : undefined;
+    // Só verifica conflito se o funcionário fica ativo (inclusive ao reativar sem mudar o número).
+    if ((d.ativo ?? atual.ativo) && (tel || (d.ativo && !atual.ativo))) {
+      await assertTelefoneLivre(
+        request.usuario,
+        tel ?? { telefone: atual.telefone, telefoneAlt: atual.telefoneAlt },
+        id,
+      );
+    }
     const f = await prisma.funcionario.update({
       where: { id },
       data: {
@@ -159,6 +177,20 @@ const funcionarios: FastifyPluginAsync = async (app) => {
       include: incluirSetor,
     });
     return serializarFuncionario(f);
+  });
+
+  /**
+   * Exclusão definitiva: apaga junto os plantões (e, por cascade, os lembretes_enviados
+   * deles) e as ausências. O histórico de mensagens fica, sem vínculo (SET NULL).
+   */
+  app.delete('/:id', async (request, reply) => {
+    const { id } = idParamSchema.parse(request.params);
+    await carregarFuncionarioPermitido(request.usuario, id, 'escrita');
+    await prisma.$transaction([
+      prisma.plantao.deleteMany({ where: { funcionarioId: id } }),
+      prisma.funcionario.delete({ where: { id } }),
+    ]);
+    return reply.code(204).send();
   });
 };
 

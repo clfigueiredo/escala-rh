@@ -85,6 +85,22 @@ export default function FuncionariosPage() {
     }
   };
 
+  const excluir = async (f: Funcionario) => {
+    const msg =
+      `Excluir ${f.nome} definitivamente?\n\n` +
+      'Todos os plantões (passados e futuros) e ausências desta pessoa também serão apagados. ' +
+      'O histórico de mensagens fica, sem o nome. Não dá para desfazer.\n\n' +
+      'Se for só um desligamento, prefira desmarcar "Ativo".';
+    if (!window.confirm(msg)) return;
+    try {
+      await funcionariosApi.excluir(f.id);
+      toast.sucesso('Funcionário excluído.');
+      void recarregar();
+    } catch (err) {
+      toast.erro(err);
+    }
+  };
+
   return (
     <div>
       <CabecalhoPagina
@@ -144,6 +160,9 @@ export default function FuncionariosPage() {
                     <td className="acoes">
                       <button className="btn btn-pequeno" onClick={() => abrir(f)}>
                         Editar
+                      </button>
+                      <button className="btn btn-pequeno btn-perigo-texto" onClick={() => void excluir(f)}>
+                        Excluir
                       </button>
                     </td>
                   </tr>
@@ -226,7 +245,7 @@ export default function FuncionariosPage() {
           <Interruptor
             marcado={form.ativo}
             onChange={(v) => set('ativo', v)}
-            rotulo="Ativo (inativo não recebe lembretes nem respostas do bot)"
+            rotulo="Ativo (inativo não recebe lembretes nem respostas do bot, e libera o número para outro cadastro)"
           />
         </form>
       </Modal>

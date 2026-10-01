@@ -72,10 +72,12 @@ Descreve o comportamento **implementado** (conferido no código em 30/09/2026).
 | GET | `/api/funcionarios/:id` | fora do escopo → 404 |
 | POST | `/api/funcionarios` | `{ nome, telefone, setorId, cargo?, observacoes?, ativo? }` → `201` |
 | PUT | `/api/funcionarios/:id` | parcial. Fora do escopo → 403 |
+| DELETE | `/api/funcionarios/:id` | exclusão definitiva → `204`; apaga junto plantões e ausências (mensagens ficam sem vínculo). Fora do escopo → 403 |
 
 - Gestor pode criar/editar funcionários **dos seus setores** (e não pode mover um funcionário para setor fora do escopo → 403).
 - `telefone` aceita qualquer formato digitado; o backend normaliza (só dígitos, DDI 55) e calcula `telefoneAlt`.
-  Inválido → 400. Já usado por outro funcionário (em qualquer das variações com/sem 9º dígito) → 409
+  Inválido → 400. Já usado por outro funcionário **ativo** (em qualquer das variações com/sem 9º dígito) → 409 — só é verificado quando o
+  funcionário fica ativo (inclusive ao reativar); inativo não bloqueia o número
   `{ erro: "Telefone já cadastrado para <nome>", detalhes: { funcionarioId } }` — se o dono do número estiver fora do escopo do gestor, só `{ erro: "Telefone já cadastrado" }`. Setor inexistente → 400.
 - `funcionario` = `{ id, nome, telefone, telefoneAlt, setorId, setor: { id, nome }, cargo, observacoes, ativo }`
 

@@ -1,17 +1,15 @@
 /**
  * Bot de consulta pelo WhatsApp (docs/05-whatsapp.md).
  *
- * '1' → próximo turno · '2' → hoje até +7 dias · '3' → mês corrente · outro → menu.
+ * '1' → próximo turno · '2' → hoje até +7 dias · '3' → hoje até +30 dias · outro → menu.
  * Só responde a funcionário ATIVO (regra 5); número desconhecido/inativo segue
  * `bot.numero_desconhecido` — só o 1º contato do número é gravado/respondido. Ausências do período aparecem na resposta; plantões que
  * caem dentro de uma ausência não são listados (não serão trabalhados).
  * Limite: 1 resposta a cada 3 s por número (em memória).
  */
 import { Prisma, type Funcionario, type TipoAusencia } from '@prisma/client';
-import { DateTime } from 'luxon';
 import { lerConfiguracoes } from './configuracoes';
 import {
-  ZONA,
   dataDoDb,
   dataParaDb,
   diaSemanaCurto,
@@ -44,11 +42,6 @@ export interface AusenciaBot {
   dataFim: string;
   observacao: string | null;
 }
-
-const MESES = [
-  'janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho',
-  'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro',
-];
 
 const ROTULO_AUSENCIA: Record<TipoAusencia, string> = {
   FERIAS: 'Férias',
@@ -115,12 +108,8 @@ export function periodoOpcao(opcao: '2' | '3', agora: Date): { dataInicio: strin
   if (opcao === '2') {
     return { dataInicio: hoje, dataFim: somarDias(hoje, 7), titulo: 'Sua escala — próximos 7 dias' };
   }
-  const dt = DateTime.fromISO(hoje, { zone: ZONA });
-  return {
-    dataInicio: dt.startOf('month').toISODate()!,
-    dataFim: dt.endOf('month').toISODate()!,
-    titulo: `Sua escala — ${MESES[dt.month - 1]}/${dt.year}`,
-  };
+  // Janela móvel (não o mês do calendário): no fim do mês já mostra o mês seguinte.
+  return { dataInicio: hoje, dataFim: somarDias(hoje, 30), titulo: 'Sua escala — próximos 30 dias' };
 }
 
 async function buscarAusencias(funcionarioId: number, dataInicio: string, dataFim: string): Promise<AusenciaBot[]> {

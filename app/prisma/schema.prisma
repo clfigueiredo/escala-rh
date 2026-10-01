@@ -120,7 +120,8 @@ model Funcionario {
   id           Int      @id @default(autoincrement())
   nome         String
   /// Só dígitos, com DDI 55 (ex.: 5551999998888)
-  telefone     String   @unique
+  /// Único só entre ativos (verificado na API) — inativo não bloqueia o número
+  telefone     String
   /// Variação com/sem 9º dígito, calculada ao salvar (null se não se aplica)
   telefoneAlt  String?  @map("telefone_alt")
   setorId      Int      @map("setor_id")
@@ -135,6 +136,7 @@ model Funcionario {
   ausencias Ausencia[]
   mensagens Mensagem[]
 
+  @@index([telefone])
   @@index([telefoneAlt])
   @@index([setorId])
   @@map("funcionarios")
@@ -190,10 +192,10 @@ model Plantao {
   criadoEm      DateTime      @default(now()) @map("criado_em") @db.Timestamptz(3)
   atualizadoEm  DateTime      @updatedAt @map("atualizado_em") @db.Timestamptz(3)
 
-  funcionario Funcionario         @relation(fields: [funcionarioId], references: [id])
-  setor       Setor               @relation(fields: [setorId], references: [id])
-  turno       Turno?              @relation(fields: [turnoId], references: [id], onDelete: SetNull)
-  criadoPor   Usuario?            @relation("PlantaoCriadoPor", fields: [criadoPorId], references: [id], onDelete: SetNull)
+  funcionario Funcionario       @relation(fields: [funcionarioId], references: [id])
+  setor       Setor             @relation(fields: [setorId], references: [id])
+  turno       Turno?            @relation(fields: [turnoId], references: [id], onDelete: SetNull)
+  criadoPor   Usuario?          @relation("PlantaoCriadoPor", fields: [criadoPorId], references: [id], onDelete: SetNull)
   lembretes   LembreteEnviado[]
 
   @@index([inicio])
@@ -272,10 +274,10 @@ model Mensagem {
   funcionario Funcionario?      @relation(fields: [funcionarioId], references: [id], onDelete: SetNull)
   lembretes   LembreteEnviado[]
 
+  @@unique([evolutionMsgId, direcao])
   @@index([criadoEm])
   @@index([funcionarioId, criadoEm])
   @@index([telefone])
-  @@unique([evolutionMsgId, direcao])
   @@map("mensagens")
 }
 

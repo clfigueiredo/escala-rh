@@ -136,20 +136,28 @@ describe('bot — funcionário ativo', () => {
     );
   });
 
-  it("'3' → mês corrente (inclui dias já passados do mês)", async () => {
+  it("'3' → hoje até +30 dias (atravessa o fim do mês, sem dias já passados)", async () => {
     const r = await receber('3');
     expect(r.acao === 'respondida' && r.texto).toBe(
       [
-        '📅 Sua escala — outubro/2026',
-        'Seg 05/10 — 07:00 às 19:00 (Recepção)',
+        '📅 Sua escala — próximos 30 dias',
         'Qui 08/10 — 07:00 às 19:00 (Recepção)',
         'Sáb 10/10 — 19:00 às 07:00 (UTI)',
         'Ter 20/10 — 07:00 às 19:00 (Recepção)',
+        'Seg 02/11 — 07:00 às 19:00 (Recepção)',
         '',
         '🏖️ Ausências no período',
         '12/10 a 16/10 — Férias',
       ].join('\n'),
     );
+  });
+
+  it("'3' no último dia do mês já traz o mês seguinte", async () => {
+    const r = await processarMensagemRecebida(
+      { telefone: '5551999998888', texto: '3', msgId: 'IN-fim-mes' },
+      { enviar, agora: () => combinarDataHora('2026-09-30', '10:00') },
+    );
+    expect(r.acao === 'respondida' && r.texto).toMatch(/^📅 Sua escala — próximos 30 dias\nSeg 05\/10/);
   });
 
   it('outro texto → menu', async () => {

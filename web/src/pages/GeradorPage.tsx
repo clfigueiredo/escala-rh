@@ -1,3 +1,4 @@
+import { DateTime } from 'luxon';
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
@@ -17,7 +18,7 @@ import {
 } from '../api';
 import { CabecalhoPagina, Campo, Carregando, Selo, Tabela, Vazio } from '../components/ui';
 import { useToast } from '../contexts/ToastContext';
-import { agoraSP, fmtData, fmtDiaCurto, fmtHora, sp } from '../lib/datas';
+import { FUSO, agoraSP, fmtData, fmtDiaCurto, fmtHora, sp } from '../lib/datas';
 import { useCarregar } from '../lib/hooks';
 import { ROTULO_CONFLITO } from '../lib/rotulos';
 import { descreverPadrao } from './PadroesPage';
@@ -66,6 +67,17 @@ export default function GeradorPage() {
 
   const padrao = padroes.find((p) => String(p.id) === padraoId);
   const turno = turnos.find((t) => String(t.id) === turnoId);
+
+  // Ciclo com duração múltipla de 7 (ex.: 6x1) repete a semana: a folga cai sempre no mesmo dia.
+  const avisoFolgaFixa = useMemo(() => {
+    if (padrao?.tipo !== 'CICLO' || !dataInicioCiclo) return null;
+    const t = padrao.diasTrabalho ?? 0;
+    const f = padrao.diasFolga ?? 0;
+    if (f < 1 || (t + f) % 7 !== 0) return null;
+    const ini = DateTime.fromISO(dataInicioCiclo, { zone: FUSO });
+    const dias = Array.from({ length: f }, (_, k) => ini.plus({ days: t + k }).toFormat('cccc'));
+    return `Folga fixa toda semana: ${dias.join(' e ')} (o ciclo de ${t + f} dias repete a semana). Para variar o dia de folga entre as pessoas, gere em grupos com datas de início diferentes.`;
+  }, [padrao, dataInicioCiclo]);
 
   const alternar = (id: number) => {
     invalidar();
@@ -272,6 +284,7 @@ export default function GeradorPage() {
                 }}
               />
             </Campo>
+            {avisoFolgaFixa && <p className="texto-pequeno texto-suave">{avisoFolgaFixa}</p>}
             <Campo rotulo="Setor dos plantões" dica="Normalmente o próprio setor de cada funcionário.">
               <select value={setorPlantao} onChange={(e) => (invalidar(), setSetorPlantao(e.target.value))}>
                 <option value="">Setor de cada funcionário</option>
@@ -333,7 +346,9 @@ export default function GeradorPage() {
             </div>
           </div>
 
-          {porFuncionario.length > 1 && (
+          {porFuncionario.length > 0 && (
+            <>
+            <h4>Resumo por funcionário</h4>
             <Tabela compacta>
               <thead>
                 <tr>
@@ -354,6 +369,7 @@ export default function GeradorPage() {
                 ))}
               </tbody>
             </Tabela>
+            </>
           )}
 
           {previa.comConflito > 0 && (

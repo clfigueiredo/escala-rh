@@ -40,7 +40,7 @@ export const CONFIGURACOES_PADRAO: Configuracoes = {
     '',
     '1 — Meu próximo turno',
     '2 — Minha escala dos próximos 7 dias',
-    '3 — Minha escala do mês',
+    '3 — Minha escala dos próximos 30 dias',
   ].join('\n'),
   'bot.numero_desconhecido': {
     acao: 'responder',

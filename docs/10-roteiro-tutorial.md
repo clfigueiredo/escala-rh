@@ -57,7 +57,8 @@ Explique isto logo no começo do tutorial, em linguagem simples, com os exemplos
 ### Tipos de padrão
 - **Ciclo** — X dias de trabalho, Y de folga, repetindo sem olhar o dia da semana.
   - **12x36** = 1 dia trabalha / 1 folga, com turno de 12 h (trabalha 12 h, descansa 36 h). Já vem cadastrado.
-  - **6x1** = 6 trabalha / 1 folga (a folga "anda" pela semana). Já vem cadastrado.
+  - **6x1** = 6 trabalha / 1 folga. O ciclo tem 7 dias, então a folga cai **sempre no mesmo dia da semana**
+    (definido pela data de início do ciclo). Para espalhar as folgas, gere grupos com datas de início diferentes. Já vem cadastrado.
   - **4x2** = 4 trabalha / 2 folga (exemplo para cadastrar).
 - **Semanal** — dias fixos da semana.
   - **5x2** = segunda a sexta. Já vem cadastrado.
@@ -166,7 +167,8 @@ Use o **mês seguinte ao atual** (o gerador já vem com ele preenchido). Faça u
 2. **12x36 dia – Equipe B:** Bruno · mesmo padrão e turno · início do ciclo = dia 2. → Mostrar no calendário que
    Ana e Bruno se alternam e o dia fica sempre coberto.
 3. **12x36 noite:** Carla · Plantão noite · início dia 1. Mostrar no calendário o plantão que termina às 07:00 do dia seguinte.
-4. **6x1:** Diego · 6x1 · Plantão dia. Mostrar a folga "andando" pela semana.
+4. **6x1:** Diego · 6x1 · Plantão dia. Mostrar o aviso "Folga fixa toda semana: …" abaixo da data de início do ciclo
+   e, no calendário, a folga no mesmo dia da semana. Trocar a data de início para mostrar que a folga muda de dia.
 5. **5x2:** Elisa · 5x2 · Comercial. Mostrar que sábados e domingos ficam livres.
 
 Em cada geração, mostrar: **Pré-visualizar** (nada é gravado ainda) → total de plantões, resumo por funcionário
@@ -224,7 +226,7 @@ enviar as capturas/prints (ou transcreva as respostas):
 | qualquer texto (ex.: "oi") | o menu |
 | `1` | próximo turno (data, dia da semana, horário, setor) |
 | `2` | escala dos próximos 7 dias |
-| `3` | escala do mês atual |
+| `3` | escala dos próximos 30 dias (no fim do mês já mostra o mês seguinte) |
 | outra coisa | o menu de novo |
 
 Explicar: ausências aparecem na resposta e plantões dentro delas não são listados; o bot só responde a funcionários
