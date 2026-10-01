@@ -1,0 +1,24 @@
+# Segredos — nunca versionar
+.env
+.env.*
+!.env.example
+
+# Dumps do banco
+backups/
+
+# Dependências e builds
+node_modules/
+dist/
+*.tsbuildinfo
+coverage/
+
+# Ferramentas locais
+everything-claude-code/
+.claude/settings.local.json
+
+# Sistema / editores
+.DS_Store
+*.log
+*.swp
+.vscode/
+.idea/

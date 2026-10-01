@@ -1,0 +1,38 @@
+# Sistema de Escala RH — proxy/HTTPS (certificado Let's Encrypt automático)
+{$DOMAIN} {
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "camera=(), microphone=(), geolocation=()"
+		# CSP do painel: build Vite sem script inline; FullCalendar injeta <style>; QR Code é img data:
+		Content-Security-Policy "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; script-src 'self'; connect-src 'self'; font-src 'self' data:; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'"
+		-Server
+	}
+
+	# Webhook da Evolution: só pela rede interna (evolution -> app:3000).
+	# Bloqueado para a internet ANTES do handle /api/*.
+	@webhooks path /api/webhooks /api/webhooks/*
+	handle @webhooks {
+		respond 404
+	}
+
+	# API (Fastify).
+	handle /api/* {
+		reverse_proxy app:3000
+	}
+
+	# Painel React (build estático)
+	handle {
+		root * /srv/web
+		try_files {path} /index.html
+		file_server
+	}
+
+	log {
+		output stdout
+	}
+}

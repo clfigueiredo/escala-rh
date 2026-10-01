@@ -1,0 +1,205 @@
+# Sistema de Escala RH — orquestração (homologação)
+# Regra: SOMENTE o caddy publica portas (80/443). Nada de 8080/5432/6379 para fora.
+# Variáveis vêm do arquivo .env (mesmo diretório). Modelo em .env.example.
+
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+x-app-env: &app-env
+  DATABASE_URL: ${APP_DB_URL}
+  JWT_SECRET: ${JWT_SECRET}
+  # ADMIN_EMAIL/ADMIN_PASSWORD NÃO ficam aqui: só o seed usa, passadas no
+  # `docker compose run --rm -e ADMIN_EMAIL -e ADMIN_PASSWORD app node dist/seed.js` (deploy.sh)
+  EVOLUTION_URL: http://evolution:8080
+  EVOLUTION_API_KEY: ${EVOLUTION_API_KEY}
+  EVOLUTION_INSTANCE: ${EVOLUTION_INSTANCE}
+  WEBHOOK_TOKEN: ${WEBHOOK_TOKEN}
+  TZ: America/Sao_Paulo
+  DOMAIN: ${DOMAIN}
+  NODE_ENV: production
+
+name: escala
+
+services:
+  caddy:
+    image: caddy:2.11-alpine
+    restart: unless-stopped
+    # Sem depends_on do app: o caddy precisa subir mesmo sem a API.
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      DOMAIN: ${DOMAIN}
+      TZ: America/Sao_Paulo
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./web/dist:/srv/web:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks: [escala_net]
+    logging: *logging
+
+  app:
+    build: ./app
+    image: escala-app:latest
+    restart: unless-stopped
+    command: node dist/server.js
+    environment: *app-env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3000/api/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    networks: [escala_net]
+    logging: *logging
+
+  worker:
+    build: ./app
+    image: escala-app:latest
+    restart: unless-stopped
+    command: node dist/worker.js
+    environment: *app-env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    # O worker grava /tmp/worker-heartbeat a cada ciclo; parado há > 180 s = unhealthy
+    healthcheck:
+      test: ["CMD", "node", "-e", "try{process.exit(Date.now()-require('fs').statSync('/tmp/worker-heartbeat').mtimeMs<180000?0:1)}catch(e){process.exit(1)}"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 90s
+    networks: [escala_net]
+    logging: *logging
+
+  postgres:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: escala
+      # Usadas só pelo init (volume novo) para criar as roles escala_app/evolution_app
+      APP_DB_PASSWORD: ${APP_DB_PASSWORD}
+      EVOLUTION_DB_PASSWORD: ${EVOLUTION_DB_PASSWORD}
+      TZ: America/Sao_Paulo
+      PGTZ: America/Sao_Paulo
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+      - ./infra/postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d escala"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    networks: [escala_net]
+    logging: *logging
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    # Senha obrigatória (requirepass). O redis-server troca o título do processo,
+    # então a senha não aparece no ps.
+    # (via docker-entrypoint.sh para manter a troca para o usuário `redis`)
+    command: ["sh", "-c", 'exec docker-entrypoint.sh redis-server --appendonly yes --requirepass "$$REDIS_PASSWORD"']
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", 'REDISCLI_AUTH="$$REDIS_PASSWORD" redis-cli ping | grep -q PONG']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks: [escala_net]
+    logging: *logging
+
+  evolution:
+    image: evoapicloud/evolution-api:v2.3.7
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      TZ: America/Sao_Paulo
+      SERVER_TYPE: http
+      SERVER_PORT: "8080"
+      SERVER_URL: http://evolution:8080
+      AUTHENTICATION_API_KEY: ${EVOLUTION_API_KEY}
+      AUTHENTICATION_EXPOSE_IN_FETCH_INSTANCES: "false"
+      DEL_INSTANCE: "false"
+      LANGUAGE: pt-BR
+      TELEMETRY_ENABLED: "false"
+      LOG_LEVEL: ERROR,WARN,INFO
+      LOG_COLOR: "false"
+      LOG_BAILEYS: error
+      # Banco (base `evolution`, schema próprio) — role evolution_app, sem superusuário
+      DATABASE_PROVIDER: postgresql
+      DATABASE_CONNECTION_URI: postgresql://evolution_app:${EVOLUTION_DB_PASSWORD}@postgres:5432/evolution?schema=evolution_api
+      DATABASE_CONNECTION_CLIENT_NAME: escala_evolution
+      DATABASE_SAVE_DATA_INSTANCE: "true"
+      DATABASE_SAVE_DATA_NEW_MESSAGE: "true"
+      DATABASE_SAVE_MESSAGE_UPDATE: "true"
+      DATABASE_SAVE_DATA_CONTACTS: "true"
+      DATABASE_SAVE_DATA_CHATS: "true"
+      DATABASE_SAVE_DATA_LABELS: "false"
+      DATABASE_SAVE_DATA_HISTORIC: "false"
+      # Cache
+      CACHE_REDIS_ENABLED: "true"
+      CACHE_REDIS_URI: redis://:${REDIS_PASSWORD}@redis:6379/1
+      CACHE_REDIS_PREFIX_KEY: evolution
+      CACHE_REDIS_SAVE_INSTANCES: "false"
+      CACHE_LOCAL_ENABLED: "false"
+      # Integrações não usadas
+      WEBHOOK_GLOBAL_ENABLED: "false"
+      WEBSOCKET_ENABLED: "false"
+      RABBITMQ_ENABLED: "false"
+      SQS_ENABLED: "false"
+      KAFKA_ENABLED: "false"
+      PUSHER_ENABLED: "false"
+      S3_ENABLED: "false"
+      TYPEBOT_ENABLED: "false"
+      CHATWOOT_ENABLED: "false"
+      OPENAI_ENABLED: "false"
+      DIFY_ENABLED: "false"
+      # Sessão / QR
+      CONFIG_SESSION_PHONE_CLIENT: Escala RH
+      CONFIG_SESSION_PHONE_NAME: Chrome
+      QRCODE_LIMIT: "30"
+      # CORS fica "*" de propósito: a Evolution 2.3.7 responde 500 "Not allowed by CORS"
+      # a QUALQUER requisição sem header Origin quando a lista não tem "*" (o fetch do
+      # app e o healthcheck não enviam Origin). A proteção real é a Evolution não ser
+      # exposta (só rede interna) + apikey; CORS só vale para navegador.
+      CORS_ORIGIN: "*"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/ >/dev/null || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 90s
+    volumes:
+      - evolution_instances:/evolution/instances
+    networks: [escala_net]
+    logging: *logging
+
+networks:
+  escala_net:
+    name: escala_net
+
+volumes:
+  pg_data:
+  redis_data:
+  evolution_instances:
+  caddy_data:
+  caddy_config:

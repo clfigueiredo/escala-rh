@@ -1,0 +1,290 @@
+// Sistema de Escala RH — modelo de dados (ver docs/04-banco-de-dados.md)
+// Convenções: models em PascalCase singular, campos camelCase com @map para
+// snake_case, @@map com o nome da tabela do doc. Horas ("time" no doc) são
+// guardadas como texto "HH:mm" (VarChar(5)) para não sofrer conversão de fuso.
+
+generator client {
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Perfil {
+  ADMIN
+  GESTOR
+}
+
+enum TipoPadrao {
+  CICLO
+  SEMANAL
+}
+
+enum StatusPlantao {
+  AGENDADO
+  CANCELADO
+}
+
+enum OrigemPlantao {
+  GERADO
+  MANUAL
+}
+
+enum TipoAusencia {
+  FERIAS
+  ATESTADO
+  FOLGA
+  OUTRO
+}
+
+enum TipoRegraLembrete {
+  ANTECEDENCIA
+  VESPERA
+}
+
+enum StatusLembrete {
+  PENDENTE
+  ENVIADO
+  FALHOU
+  IGNORADO
+}
+
+enum DirecaoMensagem {
+  ENVIADA
+  RECEBIDA
+}
+
+enum OrigemMensagem {
+  LEMBRETE
+  BOT
+  MANUAL
+}
+
+enum StatusMensagem {
+  OK
+  FALHOU
+}
+
+model Usuario {
+  id           Int      @id @default(autoincrement())
+  nome         String
+  email        String   @unique
+  senhaHash    String   @map("senha_hash")
+  perfil       Perfil   @default(GESTOR)
+  ativo        Boolean  @default(true)
+  /// Incrementada no logout, troca de senha e alteração de senha/perfil/desativação pelo admin:
+  /// invalida todos os JWT emitidos antes (claim `ver`).
+  sessaoVersao Int      @default(0) @map("sessao_versao")
+  criadoEm     DateTime @default(now()) @map("criado_em") @db.Timestamptz(3)
+  atualizadoEm DateTime @updatedAt @map("atualizado_em") @db.Timestamptz(3)
+
+  setores         UsuarioSetor[]
+  plantoesCriados Plantao[]      @relation("PlantaoCriadoPor")
+
+  @@map("usuarios")
+}
+
+model UsuarioSetor {
+  id           Int      @id @default(autoincrement())
+  usuarioId    Int      @map("usuario_id")
+  setorId      Int      @map("setor_id")
+  criadoEm     DateTime @default(now()) @map("criado_em") @db.Timestamptz(3)
+  atualizadoEm DateTime @updatedAt @map("atualizado_em") @db.Timestamptz(3)
+
+  usuario Usuario @relation(fields: [usuarioId], references: [id], onDelete: Cascade)
+  setor   Setor   @relation(fields: [setorId], references: [id], onDelete: Cascade)
+
+  @@unique([usuarioId, setorId])
+  @@index([setorId])
+  @@map("usuario_setores")
+}
+
+model Setor {
+  id           Int      @id @default(autoincrement())
+  nome         String   @unique
+  ativo        Boolean  @default(true)
+  criadoEm     DateTime @default(now()) @map("criado_em") @db.Timestamptz(3)
+  atualizadoEm DateTime @updatedAt @map("atualizado_em") @db.Timestamptz(3)
+
+  usuarios     UsuarioSetor[]
+  funcionarios Funcionario[]
+  plantoes     Plantao[]
+
+  @@map("setores")
+}
+
+model Funcionario {
+  id           Int      @id @default(autoincrement())
+  nome         String
+  /// Só dígitos, com DDI 55 (ex.: 5551999998888)
+  telefone     String   @unique
+  /// Variação com/sem 9º dígito, calculada ao salvar (null se não se aplica)
+  telefoneAlt  String?  @map("telefone_alt")
+  setorId      Int      @map("setor_id")
+  cargo        String?
+  observacoes  String?
+  ativo        Boolean  @default(true)
+  criadoEm     DateTime @default(now()) @map("criado_em") @db.Timestamptz(3)
+  atualizadoEm DateTime @updatedAt @map("atualizado_em") @db.Timestamptz(3)
+
+  setor     Setor      @relation(fields: [setorId], references: [id])
+  plantoes  Plantao[]
+  ausencias Ausencia[]
+  mensagens Mensagem[]
+
+  @@index([telefoneAlt])
+  @@index([setorId])
+  @@map("funcionarios")
+}
+
+model Turno {
+  id           Int      @id @default(autoincrement())
+  nome         String
+  /// "HH:mm" no fuso America/Sao_Paulo
+  horaInicio   String   @map("hora_inicio") @db.VarChar(5)
+  /// "HH:mm"; se horaFim <= horaInicio o turno termina no dia seguinte
+  horaFim      String   @map("hora_fim") @db.VarChar(5)
+  cor          String   @default("#3b82f6")
+  ativo        Boolean  @default(true)
+  criadoEm     DateTime @default(now()) @map("criado_em") @db.Timestamptz(3)
+  atualizadoEm DateTime @updatedAt @map("atualizado_em") @db.Timestamptz(3)
+
+  plantoes Plantao[]
+
+  @@map("turnos")
+}
+
+model PadraoEscala {
+  id           Int        @id @default(autoincrement())
+  nome         String
+  tipo         TipoPadrao
+  /// Só CICLO
+  diasTrabalho Int?       @map("dias_trabalho")
+  /// Só CICLO
+  diasFolga    Int?       @map("dias_folga")
+  /// Só SEMANAL (0=dom … 6=sáb)
+  diasSemana   Int[]      @default([]) @map("dias_semana")
+  ativo        Boolean    @default(true)
+  criadoEm     DateTime   @default(now()) @map("criado_em") @db.Timestamptz(3)
+  atualizadoEm DateTime   @updatedAt @map("atualizado_em") @db.Timestamptz(3)
+
+  @@map("padroes_escala")
+}
+
+/// Plantão (linha da tabela `escala`)
+model Plantao {
+  id            Int           @id @default(autoincrement())
+  funcionarioId Int           @map("funcionario_id")
+  setorId       Int           @map("setor_id")
+  /// null = horário avulso
+  turnoId       Int?          @map("turno_id")
+  inicio        DateTime      @db.Timestamptz(3)
+  fim           DateTime      @db.Timestamptz(3)
+  status        StatusPlantao @default(AGENDADO)
+  origem        OrigemPlantao @default(MANUAL)
+  observacao    String?
+  criadoPorId   Int?          @map("criado_por")
+  criadoEm      DateTime      @default(now()) @map("criado_em") @db.Timestamptz(3)
+  atualizadoEm  DateTime      @updatedAt @map("atualizado_em") @db.Timestamptz(3)
+
+  funcionario Funcionario         @relation(fields: [funcionarioId], references: [id])
+  setor       Setor               @relation(fields: [setorId], references: [id])
+  turno       Turno?              @relation(fields: [turnoId], references: [id], onDelete: SetNull)
+  criadoPor   Usuario?            @relation("PlantaoCriadoPor", fields: [criadoPorId], references: [id], onDelete: SetNull)
+  lembretes   LembreteEnviado[]
+
+  @@index([inicio])
+  @@index([funcionarioId, inicio])
+  @@index([setorId, inicio])
+  @@map("escala")
+}
+
+model Ausencia {
+  id            Int          @id @default(autoincrement())
+  funcionarioId Int          @map("funcionario_id")
+  tipo          TipoAusencia
+  dataInicio    DateTime     @map("data_inicio") @db.Date
+  /// Inclusiva
+  dataFim       DateTime     @map("data_fim") @db.Date
+  observacao    String?
+  criadoEm      DateTime     @default(now()) @map("criado_em") @db.Timestamptz(3)
+  atualizadoEm  DateTime     @updatedAt @map("atualizado_em") @db.Timestamptz(3)
+
+  funcionario Funcionario @relation(fields: [funcionarioId], references: [id], onDelete: Cascade)
+
+  @@index([funcionarioId, dataInicio])
+  @@map("ausencias")
+}
+
+model RegraLembrete {
+  id           Int               @id @default(autoincrement())
+  nome         String
+  tipo         TipoRegraLembrete
+  /// ANTECEDENCIA: minutos antes do início
+  minutos      Int?
+  /// VESPERA: "HH:mm" (fuso SP) do envio no dia anterior
+  horario      String?           @db.VarChar(5)
+  template     String
+  ativo        Boolean           @default(true)
+  criadoEm     DateTime          @default(now()) @map("criado_em") @db.Timestamptz(3)
+  atualizadoEm DateTime          @updatedAt @map("atualizado_em") @db.Timestamptz(3)
+
+  lembretes LembreteEnviado[]
+
+  @@map("regras_lembrete")
+}
+
+model LembreteEnviado {
+  id           Int            @id @default(autoincrement())
+  escalaId     Int            @map("escala_id")
+  regraId      Int            @map("regra_id")
+  status       StatusLembrete @default(PENDENTE)
+  mensagemId   Int?           @map("mensagem_id")
+  erro         String?
+  criadoEm     DateTime       @default(now()) @map("criado_em") @db.Timestamptz(3)
+  atualizadoEm DateTime       @updatedAt @map("atualizado_em") @db.Timestamptz(3)
+
+  plantao  Plantao       @relation(fields: [escalaId], references: [id], onDelete: Cascade)
+  regra    RegraLembrete @relation(fields: [regraId], references: [id], onDelete: Cascade)
+  mensagem Mensagem?     @relation(fields: [mensagemId], references: [id], onDelete: SetNull)
+
+  @@unique([escalaId, regraId])
+  @@index([regraId])
+  @@map("lembretes_enviados")
+}
+
+model Mensagem {
+  id             Int             @id @default(autoincrement())
+  direcao        DirecaoMensagem
+  telefone       String
+  funcionarioId  Int?            @map("funcionario_id")
+  conteudo       String
+  origem         OrigemMensagem
+  status         StatusMensagem  @default(OK)
+  erro           String?
+  evolutionMsgId String?         @map("evolution_msg_id")
+  criadoEm       DateTime        @default(now()) @map("criado_em") @db.Timestamptz(3)
+  atualizadoEm   DateTime        @updatedAt @map("atualizado_em") @db.Timestamptz(3)
+
+  funcionario Funcionario?      @relation(fields: [funcionarioId], references: [id], onDelete: SetNull)
+  lembretes   LembreteEnviado[]
+
+  @@index([criadoEm])
+  @@index([funcionarioId, criadoEm])
+  @@index([telefone])
+  @@unique([evolutionMsgId, direcao])
+  @@map("mensagens")
+}
+
+model Configuracao {
+  id           Int      @id @default(autoincrement())
+  chave        String   @unique
+  valor        Json     @db.JsonB
+  criadoEm     DateTime @default(now()) @map("criado_em") @db.Timestamptz(3)
+  atualizadoEm DateTime @updatedAt @map("atualizado_em") @db.Timestamptz(3)
+
+  @@map("configuracoes")
+}
