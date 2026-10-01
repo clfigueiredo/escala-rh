@@ -2,7 +2,7 @@
 
 Guia prático do painel **Escala RH**. Não é preciso conhecimento técnico.
 
-- **Endereço:** https://hotspotcontabo.forumtelecom.com.br
+- **Endereço:** https://escala.seudominio.com.br
 - **Quem usa o painel:** administradores (veem e configuram tudo) e gestores (veem só os setores vinculados a eles).
 - **Funcionários não entram no painel.** Eles recebem os lembretes e consultam a escala pelo WhatsApp.
 

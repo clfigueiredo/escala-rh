@@ -15,6 +15,7 @@ coverage/
 # Ferramentas locais
 everything-claude-code/
 .claude/settings.local.json
+CLAUDE.local.md
 
 # Sistema / editores
 .DS_Store

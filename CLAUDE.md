@@ -2,8 +2,8 @@
 
 Sistema web para o RH montar a escala de trabalho dos funcionários e avisar cada pessoa pelo WhatsApp antes do turno. O funcionário **não acessa o painel**: ele recebe lembretes e consulta a própria escala conversando com um bot no WhatsApp.
 
-- **URL:** https://hotspotcontabo.forumtelecom.com.br
-- **Servidor:** este mesmo (Ubuntu 24.04, 4 vCPU, 8 GB RAM, IP 62.171.184.27)
+- **URL:** https://escala.seudominio.com.br (exemplo — domínio e IP reais deste servidor ficam em `CLAUDE.local.md`, fora do git)
+- **Servidor:** este mesmo (Ubuntu 24.04, 4 vCPU, 8 GB RAM, IP 203.0.113.10 (exemplo))
 - **Ambiente:** servidor de **homologação (testes)**. Versionado com **git** (branch `main`) e espelhado no GitHub **público** (https://github.com/clfigueiredo/escala-rh, remote `origin`). `.env`, `backups/`, `node_modules/`, `dist/` e `everything-claude-code/` ficam fora do git (ver `.gitignore`) — nunca versionar segredos. Antes de alterações arriscadas, faça commit ou backup do banco (`./scripts/backup.sh`).
 - **Idioma:** interface, mensagens e documentação em português (pt-BR). Código (nomes de variáveis/funções) pode ser em português quando for termo de domínio (`funcionario`, `escala`, `turno`).
 

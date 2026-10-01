@@ -16,7 +16,7 @@ recebida pelo bot (`bot: mensagem processada`).
 
 ## Acesso ao painel
 
-- URL: https://hotspotcontabo.forumtelecom.com.br
+- URL: https://escala.seudominio.com.br
 - **Admin inicial:** criado pelo seed com `ADMIN_EMAIL` e `ADMIN_PASSWORD` do `.env`. Para ver os dados (só no servidor,
   nunca copiar para fora):
   ```bash
@@ -108,7 +108,7 @@ O token aparece mascarado (`***`) nos logs do app.
 
 | Sintoma | Verificar |
 |---|---|
-| Site sem HTTPS | DNS do domínio aponta para 62.171.184.27? Portas 80/443 abertas? `docker compose logs caddy` |
+| Site sem HTTPS | DNS do domínio aponta para 203.0.113.10? Portas 80/443 abertas? `docker compose logs caddy` |
 | Painel abre mas `/api` dá 502 | `docker compose ps app` (healthy?); `docker compose logs app` (variável de ambiente inválida aparece no início do log) |
 | Lembrete não chegou | Tela **Mensagens** (filtro Status = Falhou; a coluna Mensagem mostra o erro); WhatsApp conectado?; regra ativa?; funcionário ativo com telefone?; plantão cancelado ou em ausência?; `docker compose logs worker` |
 | Lembrete com erro "Envio interrompido" | O worker reiniciou no meio do envio; por segurança não reenvia (pode ter saído). Avisar o funcionário manualmente se necessário |

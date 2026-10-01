@@ -18,7 +18,7 @@ Marque `[x]` ao concluir. Cada fase termina com uma validação combinada com o 
 - [x] Caddy com HTTPS válido no domínio (página provisória)
 - [x] `scripts/backup.sh` + cron diário + teste de restore
 
-**Validação:** `https://hotspotcontabo.forumtelecom.com.br` abre com cadeado; `docker compose ps` tudo *healthy*; porta 8080/5432 inacessíveis de fora.
+**Validação:** `https://escala.seudominio.com.br` abre com cadeado; `docker compose ps` tudo *healthy*; porta 8080/5432 inacessíveis de fora.
 
 ## Fase 2 — Base do app ✅
 - [x] Projeto `app/` (Fastify + TypeScript + Prisma) e `web/` (React + Vite)

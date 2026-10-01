@@ -6,8 +6,8 @@
 |---|---|
 | SO | Ubuntu 24.04 LTS |
 | CPU / RAM / Disco | 4 vCPU / 8 GB / 145 GB |
-| IP | 62.171.184.27 |
-| Domínio | hotspotcontabo.forumtelecom.com.br (A → 62.171.184.27, já configurado) |
+| IP | 203.0.113.10 |
+| Domínio | escala.seudominio.com.br (exemplo — registro A → 203.0.113.10) |
 | Diretório do projeto | `/var/www/escala` |
 
 ## Pacotes no host
@@ -105,7 +105,7 @@ Modelo em `.env.example` (sem valores reais); o `.env` real é gerado na instala
 | Variável | Uso |
 |---|---|
 | `TZ` | `America/Sao_Paulo` |
-| `DOMAIN` | `hotspotcontabo.forumtelecom.com.br` |
+| `DOMAIN` | `escala.seudominio.com.br` |
 | `POSTGRES_USER` / `POSTGRES_PASSWORD` | superusuário do Postgres — só backup/restore/admin (nenhum serviço usa) |
 | `APP_DB_PASSWORD` | senha da role `escala_app` (mín. 24 caracteres `[A-Za-z0-9]`) |
 | `EVOLUTION_DB_PASSWORD` | senha da role `evolution_app` (mín. 24 caracteres `[A-Za-z0-9]`) |

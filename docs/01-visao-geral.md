@@ -63,4 +63,4 @@ Só entram quando o usuário pedir:
 
 - Um número de WhatsApp **dedicado** ao sistema (Evolution API usa conexão não oficial — número dedicado reduz risco para a empresa).
 - Fuso horário único: `America/Sao_Paulo`.
-- Sistema hospedado no próprio servidor, domínio `hotspotcontabo.forumtelecom.com.br`.
+- Sistema hospedado no próprio servidor, domínio `escala.seudominio.com.br`.
